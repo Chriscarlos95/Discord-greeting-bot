@@ -1,0 +1,104 @@
+import discord
+from discord.ext import commands, tasks
+from discord.ext.commands import Bot
+from discord import ChannelType
+import ffmpeg
+
+quiet = False
+bot = commands.Bot(command_prefix="!")
+#access token for discord
+token = 'ODc2NzI0MDY2NjI5ODc3ODEw.YRoO6g.ZuJyyYW3-sX-K5TuG3uE3DsuQTw'
+
+#bot will not speak in voice chat
+@bot.command(pass_context = True)
+async def silence(ctx):
+    global quiet
+    quiet = True
+    print('Bot now Silent')
+    await ctx.send("It's a trap")
+
+#bot will start speaking again
+@bot.command(pass_context = True)
+async def loud(ctx):
+    global quiet
+    quiet = False
+    print('Bot now Loud')
+    await ctx.send("Beep Boop")
+
+@bot.event
+async def on_message(message):
+    if message.content == 'ping':
+        print(message.author)
+        await message.channel.send(f'pong! {round(bot.latency * 1000)}ms')
+    if message.author == bot.user:
+        return
+
+    if message.content.startswith('hello'):
+        await message.channel.send(f'Whaaaaaaaaaooowwwww!')
+    await bot.process_commands(message)
+
+    if not quiet:
+
+        if message.content.startswith('scream'):
+            channel = message.guild.voice_client
+            if not channel:
+                await channel.connect()
+            #discord api only accepts PCM Audio format
+            channel.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\scream.mp3'))
+
+        if message.content.startswith('danger'):
+            channel = message.guild.voice_client
+            if not channel:
+                await channel.connect()
+            channel.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\Danger.mp3'))
+
+        if message.content.startswith('argue'):
+            channel = message.guild.voice_client
+            if not channel:
+                await channel.connect()
+            channel.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\\argue.mp3'))
+
+        if message.content.startswith('die'):
+            channel = message.guild.voice_client
+            if not channel:
+                await channel.connect()
+            channel.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\Die.mp3'))
+
+        if message.content.startswith('liar'):
+            channel = message.guild.voice_client
+            if not channel:
+                await channel.connect()
+            channel.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\liar.mp3'))
+
+        if message.content.startswith('sorry'):
+            channel = message.guild.voice_client
+            if not channel:
+                await channel.connect()
+            channel.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\\sorry.mp3'))
+
+    #after checking messages check commands
+    await bot.process_commands(message)
+
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+    channel = after.channel # Voice channel after voice state update
+    bot_connection = member.guild.voice_client # Bot connection
+    if channel:
+        if bot_connection:
+            # Move to new channel if bot was connected to a previous one
+            await bot_connection.disconnect()
+            voice_client = await channel.connect()
+            voice_client.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source= 'C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\weeWoop.mp3'))
+
+        else:
+            # If bot was not connected, connect it to the new channel
+            voice_client = await channel.connect()
+            voice_client.play(discord.FFmpegPCMAudio(executable='C:\FFmpeg\\ffmpeg.exe', source='C:\\Users\chris\PycharmProjects\SuperCoolDiscordBot\\venv\Rec\weeWoop.mp3'))
+
+    if not channel and bot_connection: # Disconnect if any member has left
+        await bot_connection.disconnect()
+    else:
+        print('Error connecting to channel')
+print('Bot Active')
+bot.run(token)
